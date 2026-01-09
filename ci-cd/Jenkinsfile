@@ -29,16 +29,18 @@ pipeline {
         }
 
         stage('Start Backend') {
-            steps {
+    steps {
                 dir('backend') {
                     bat '''
                     echo Starting backend...
                     start /B node server.js
-                    timeout /T 5
-                    '''
-                }
-            }
+            REM wait for backend to be reachable
+            ping -n 6 127.0.0.1 > nul
+            '''
         }
+    }
+}
+
 
         stage('Run Automated Tests') {
             steps {
