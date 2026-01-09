@@ -3,7 +3,6 @@ package tests;
 import java.time.Duration;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -15,7 +14,7 @@ import utils.DatabaseUtils;
 public class TaskDbIntegrationTest extends BaseTest {
 
     @Test
-    public void verifyTaskCreationAndDeletionInDatabase() {
+    public void verifyTaskCreationAndDeletionInDatabase() throws InterruptedException {
 
         String taskName = "DB Integration Task";
 
@@ -28,27 +27,34 @@ public class TaskDbIntegrationTest extends BaseTest {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
             wait.until(ExpectedConditions.alertIsPresent());
             driver.switchTo().alert().accept();
-        } catch (NoAlertPresentException e) {
-            // Alert not shown — safe to continue
         } catch (Exception e) {
-            // Timeout waiting for alert — safe to continue
+            // Alert not shown — safe to continue
         }
 
-        // STEP 3: Verify task exists in DB
+        // STEP 3: Verify task exists in DB (wait with retry)
         boolean taskExistsInDb = DatabaseUtils.waitForTask(taskName, 5);
         Assert.assertTrue(
                 taskExistsInDb,
-                "❌ Task was not found in DB after UI creation"
+                "Task was not found in DB after UI creation"
         );
 
-        // STEP 4: Cleanup (DB-level delete)
+        // STEP 4: Cleanup — delete task at DB level
         DatabaseUtils.deleteTask(taskName);
 
-        // STEP 5: Verify task is deleted from DB
-        boolean taskStillExists = DatabaseUtils.isTaskPresent(taskName);
+        // STEP 5: Verify task is deleted from DB (eventual consistency)
+        boolean exists = true;
+
+        for (int i = 0; i < 5; i++) {
+            exists = DatabaseUtils.isTaskPresent(taskName);
+            if (!exists) {
+                break; // task successfully deleted
+            }
+            Thread.sleep(1000); // wait 1 second before retry
+        }
+
         Assert.assertFalse(
-                taskStillExists,
-                "❌ Task still exists in DB after deletion"
+                exists,
+                "Task was still present in DB after deletion"
         );
     }
 }
