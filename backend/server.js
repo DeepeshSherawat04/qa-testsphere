@@ -23,16 +23,31 @@ app.post("/api/tasks", async (req, res) => {
   const { taskName } = req.body;
 
   try {
-    await pool.query(
-      `INSERT INTO tasks (task_name, user_id)
-       SELECT $1, user_id FROM users WHERE email = 'testuser@gmail.com'`,
-      [taskName]
+    // 1️⃣ Find test user
+    const userResult = await pool.query(
+      "SELECT user_id FROM users WHERE email = $1",
+      ["testuser@gmail.com"]
     );
 
-    // ✅ SUCCESS response used by UI + Selenium
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Test user not found in database"
+      });
+    }
+
+    const userId = userResult.rows[0].user_id;
+
+    // 2️⃣ Insert task
+    await pool.query(
+      "INSERT INTO tasks (task_name, user_id) VALUES ($1, $2)",
+      [taskName, userId]
+    );
+
+    // 3️⃣ Return confirmation (Selenium waits on UI)
     res.status(200).json({
       success: true,
-      taskName: taskName
+      taskName
     });
 
   } catch (err) {
@@ -43,6 +58,8 @@ app.post("/api/tasks", async (req, res) => {
     });
   }
 });
+
+
 
 
 /**
