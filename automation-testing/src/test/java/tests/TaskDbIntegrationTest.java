@@ -19,24 +19,19 @@ public class TaskDbIntegrationTest extends BaseTest {
         String taskName = "DB Integration Task";
 
         // STEP 1: Add task using UI
-        driver.findElement(By.id("taskInput")).sendKeys(taskName);
-        driver.findElement(By.id("addTaskBtn")).click();
+driver.findElement(By.id("taskInput")).sendKeys(taskName);
+driver.findElement(By.id("addTaskBtn")).click();
 
-        // STEP 2: Handle alert safely (if present)
-        try {
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-            wait.until(ExpectedConditions.alertIsPresent());
-            driver.switchTo().alert().accept();
-        } catch (Exception e) {
-            // Alert not shown — safe to continue
-        }
+// 🔥 ADD THIS BLOCK HERE 🔥
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+wait.until(ExpectedConditions.visibilityOfElementLocated(
+        By.xpath("//li[text()='" + taskName + "']")
+));
 
-        // STEP 3: Verify task exists in DB (wait with retry)
-        boolean taskExistsInDb = DatabaseUtils.waitForTask(taskName, 5);
-        Assert.assertTrue(
-                taskExistsInDb,
-                "Task was not found in DB after UI creation"
-        );
+// STEP 3: NOW verify DB
+boolean taskExistsInDb = DatabaseUtils.waitForTask(taskName, 5);
+Assert.assertTrue(taskExistsInDb, "Task was not found in DB after UI creation");
+
 
         // STEP 4: Cleanup — delete task at DB level
         DatabaseUtils.deleteTask(taskName);

@@ -2,10 +2,9 @@ pipeline {
     agent any
 
     tools {
-    jdk 'JDK-17'
-    maven 'Maven-3.9'
-}
-
+        jdk 'JDK-17'
+        maven 'Maven-3.9'
+    }
 
     environment {
         DB_URL = 'jdbc:postgresql://localhost:5432/qa-testsphere'
@@ -26,6 +25,18 @@ pipeline {
             steps {
                 bat 'java -version'
                 bat 'mvn -version'
+            }
+        }
+
+        stage('Start Backend') {
+            steps {
+                dir('backend') {
+                    bat '''
+                    echo Starting backend...
+                    start /B node server.js
+                    timeout /T 5
+                    '''
+                }
             }
         }
 

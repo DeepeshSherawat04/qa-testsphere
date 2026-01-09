@@ -23,7 +23,7 @@ public class BaseTest {
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
         // Point to your dummy HTML app
-        driver.get("D:\\qa-testsphere\\automation-testing\\dummy-app\\login.html");
+        driver.get("http://127.0.0.1:5500/automation-testing/dummy-app/login.html");
     }
 
     @AfterMethod
