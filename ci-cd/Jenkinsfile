@@ -14,6 +14,14 @@ pipeline {
 
     stages {
 
+        stage('Debug DB Env') {
+    steps {
+        bat 'echo DB_URL=%DB_URL%'
+        bat 'echo DB_USER=%DB_USER%'
+    }
+}
+
+
         stage('Checkout Code') {
             steps {
                 echo 'Checking out source code...'
