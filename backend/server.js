@@ -16,35 +16,46 @@ const pool = new Pool({
 
 /**
  * POST /api/tasks
- * Body: { taskName, email }
+ * Body: { taskName }
+ * Assumes test user already exists in DB
  */
 app.post("/api/tasks", async (req, res) => {
-  const { taskName, email } = req.body;
+  const { taskName } = req.body;
+
+  if (!taskName) {
+    return res.status(400).json({ success: false, message: "Task name required" });
+  }
 
   try {
-    // 1️⃣ Find user
-    const userResult = await pool.query(
-      "SELECT user_id FROM users WHERE email = $1",
-      [email]
+    // ✅ Insert task ONLY after user is confirmed
+    const result = await pool.query(
+      `
+      INSERT INTO tasks (task_name, user_id)
+      SELECT $1, user_id
+      FROM users
+      WHERE email = 'testuser@gmail.com'
+      RETURNING task_id
+      `,
+      [taskName]
     );
 
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ message: "User not found" });
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found for task creation",
+      });
     }
 
-    const userId = userResult.rows[0].user_id;
+    // ✅ IMPORTANT: Return success ONLY after DB commit
+    res.status(200).json({
+      success: true,
+      taskName: taskName,
+      taskId: result.rows[0].task_id,
+    });
 
-    // 2️⃣ Insert task
-    await pool.query(
-  `INSERT INTO tasks (task_name, user_id)
-   SELECT $1, user_id FROM users WHERE email='testuser@gmail.com'`,
-  [taskName]
-);
-
-    res.status(201).json({ message: "Task created" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "DB error" });
+    console.error("DB ERROR:", err);
+    res.status(500).json({ success: false, message: "Database error" });
   }
 });
 
@@ -60,13 +71,17 @@ app.delete("/api/tasks/:taskName", async (req, res) => {
       [taskName]
     );
 
-    res.json({ message: "Task deleted" });
+    res.status(200).json({
+      success: true,
+      message: "Task deleted",
+      taskName: taskName,
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "DB error" });
+    console.error("DB ERROR:", err);
+    res.status(500).json({ success: false, message: "Database error" });
   }
 });
 
 app.listen(3000, () => {
-  console.log("Backend running on http://localhost:3000");
+  console.log("✅ Backend running on http://localhost:3000");
 });
