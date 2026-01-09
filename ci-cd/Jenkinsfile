@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'JDK17'
+        maven 'Maven3'
+    }
+
+    environment {
+        DB_URL = 'jdbc:postgresql://localhost:5432/qa-testsphere'
+        DB_USER = 'postgres'
+        DB_PASSWORD = 'postgres123'
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                echo 'Checking out source code...'
+                checkout scm
+            }
+        }
+
+        stage('Verify Tools') {
+            steps {
+                bat 'java -version'
+                bat 'mvn -version'
+            }
+        }
+
+        stage('Run Automated Tests') {
+            steps {
+                dir('automation-testing') {
+                    bat 'mvn clean test'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution finished'
+            archiveArtifacts artifacts: '**/target/surefire-reports/*.xml', allowEmptyArchive: true
+        }
+        success {
+            echo 'BUILD SUCCESS: All tests passed'
+        }
+        failure {
+            echo 'BUILD FAILED: Some tests failed'
+        }
+    }
+}

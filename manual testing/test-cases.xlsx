@@ -1,0 +1,6 @@
+| TC ID | Scenario ID | Steps                             | Expected Result     | OS     | Browser |
+| ----- | ----------- | --------------------------------- | ------------------- | ------ | ------- |
+| TC-01 | TS-01       | Enter valid credentials and login | Login successful    | Win 11 | Chrome  |
+| TC-02 | TS-02       | Enter invalid password            | Error message shown | Win 7  | Firefox |
+| TC-03 | TS-03       | Create new task                   | Task created        | Win 8  | Chrome  |
+| TC-04 | TS-05       | Delete task                       | Task deleted        | Win 7  | Edge    |

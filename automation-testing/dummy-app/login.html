@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QA TestSphere</title>
+</head>
+<body>
+
+<input id="taskInput" placeholder="Task name">
+<button id="addTaskBtn">Add Task</button>
+
+<ul id="taskList"></ul>
+
+<script>
+document.getElementById("addTaskBtn").addEventListener("click", async () => {
+  const taskName = document.getElementById("taskInput").value;
+
+  await fetch("http://localhost:3000/add-task", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ taskName })
+  });
+
+  // render task in UI (IMPORTANT for Selenium)
+  const li = document.createElement("li");
+  li.innerText = taskName;
+  document.getElementById("taskList").appendChild(li);
+
+  alert("Task submitted");
+});
+</script>
+
+</body>
+</html>

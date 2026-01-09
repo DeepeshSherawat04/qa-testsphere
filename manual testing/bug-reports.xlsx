@@ -1,0 +1,4 @@
+| Bug ID | Title       | Steps                  | Expected      | Actual        | OS    | Browser | Severity |
+| ------ | ----------- | ---------------------- | ------------- | ------------- | ----- | ------- | -------- |
+| BUG-01 | Login fails | Login with valid creds | Success       | Page refresh  | Win 7 | Firefox | High     |
+| BUG-02 | UI breaks   | Resize window          | Responsive UI | Layout breaks | Win 8 | Chrome  | Medium   |

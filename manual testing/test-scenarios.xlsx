@@ -1,0 +1,11 @@
+| Scenario ID | Module        | Scenario Description                  |
+| ----------- | ------------- | ------------------------------------- |
+| TS-01       | Login         | Verify login with valid credentials   |
+| TS-02       | Login         | Verify login with invalid credentials |
+| TS-03       | Task          | Verify task creation                  |
+| TS-04       | Task          | Verify task update                    |
+| TS-05       | Task          | Verify task deletion                  |
+| TS-06       | Task          | Verify task status change             |
+| TS-07       | Compatibility | Verify app behavior on Windows 7      |
+| TS-08       | Compatibility | Verify app behavior on Windows 8      |
+| TS-09       | Compatibility | Verify browser compatibility          |

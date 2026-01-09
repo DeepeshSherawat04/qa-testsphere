@@ -1,0 +1,5 @@
+base\BaseTest.class
+tests\TaskDbIntegrationTest.class
+tests\TaskTest.class
+tests\SmokeTest.class
+utils\DatabaseUtils.class
