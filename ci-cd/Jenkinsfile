@@ -30,12 +30,18 @@ pipeline {
 
         stage('Start Backend') {
     steps {
-                dir('backend') {
-                    bat '''
-                    echo Starting backend...
-                    start /B node server.js
-            REM wait for backend to be reachable
-            ping -n 6 127.0.0.1 > nul
+        dir('backend') {
+            bat '''
+            echo Killing old node processes...
+            taskkill /F /IM node.exe >nul 2>&1 || echo No node running
+
+            echo Starting backend...
+            start /B node server.js
+
+            echo Waiting for backend...
+            ping -n 6 127.0.0.1 >nul
+
+            echo Backend ready
             '''
         }
     }
