@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>QA TestSphere</title>
+    <meta charset="UTF-8">
+    <title>QA TestSphere</title>
 </head>
 <body>
+
+<h2>Task Manager</h2>
 
 <input id="taskInput" placeholder="Task name">
 <button id="addTaskBtn">Add Task</button>
@@ -12,20 +15,49 @@
 
 <script>
 document.getElementById("addTaskBtn").addEventListener("click", async () => {
-  const taskName = document.getElementById("taskInput").value;
+    const taskInput = document.getElementById("taskInput");
+    const taskName = taskInput.value.trim();
 
-  await fetch("http://localhost:3000/add-task", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ taskName })
-  });
+    // ✅ Input validation
+    if (!taskName) {
+        console.warn("Task name is empty");
+        return;
+    }
 
-  // render task in UI (IMPORTANT for Selenium)
-  const li = document.createElement("li");
-  li.innerText = taskName;
-  document.getElementById("taskList").appendChild(li);
+    try {
+        // ✅ ABSOLUTE backend URL (CI-safe)
+        const response = await fetch("http://localhost:3000/add-task", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ taskName })
+        });
 
-  alert("Task submitted");
+        if (!response.ok) {
+            console.error("Failed to add task");
+            return;
+        }
+
+        // ✅ Render task in UI (IMPORTANT for Selenium)
+        const li = document.createElement("li");
+        li.textContent = taskName;
+        li.setAttribute("data-task", taskName);
+
+        // Optional: click to delete (manual testing)
+        li.addEventListener("click", async () => {
+            await fetch(`http://localhost:3000/delete-task/${taskName}`, {
+                method: "DELETE"
+            });
+            li.remove();
+        });
+
+        document.getElementById("taskList").appendChild(li);
+
+        // ✅ Clear input (better UX + test reliability)
+        taskInput.value = "";
+
+    } catch (error) {
+        console.error("Error communicating with backend", error);
+    }
 });
 </script>
 
