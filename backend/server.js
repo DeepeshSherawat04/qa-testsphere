@@ -40,9 +40,16 @@ app.post("/api/tasks", async (req, res) => {
 
     // 2️⃣ Insert task
     await pool.query(
-      "INSERT INTO tasks (task_name, user_id) VALUES ($1, $2)",
-      [taskName, userId]
-    );
+  `
+  INSERT INTO tasks (task_name, user_id)
+  SELECT $1, $2
+  WHERE NOT EXISTS (
+    SELECT 1 FROM tasks WHERE task_name = $1 AND user_id = $2
+  )
+  `,
+  [taskName, userId]
+);
+
 
     // 3️⃣ Return confirmation (Selenium waits on UI)
     res.status(200).json({
